@@ -3,20 +3,27 @@ import AVFoundation
 import MediaPlayer
 
 final class DashboardViewController: UIViewController {
-    private let navy = UIColor(red: 12/255, green: 20/255, blue: 34/255, alpha: 1)
-    private let panel = UIColor(red: 25/255, green: 36/255, blue: 53/255, alpha: 1)
-    private let blue = UIColor(red: 43/255, green: 139/255, blue: 230/255, alpha: 1)
-    private let silver = UIColor(red: 192/255, green: 205/255, blue: 220/255, alpha: 1)
-    private let main = UIView()
-    private let titleLabel = UILabel()
-    private let timeLabel = UILabel()
-    private let statusLabel = UILabel()
-    private let sectionLabel = UILabel()
+    private let navy = UIColor(red: 8/255, green: 16/255, blue: 29/255, alpha: 1)
+    private let panel = UIColor(red: 17/255, green: 30/255, blue: 48/255, alpha: 1)
+    private let lightPanel = UIColor(red: 27/255, green: 46/255, blue: 70/255, alpha: 1)
+    private let blue = UIColor(red: 0/255, green: 151/255, blue: 255/255, alpha: 1)
+    private let silver = UIColor(red: 196/255, green: 211/255, blue: 228/255, alpha: 1)
+    private let root = UIView()
+    private let header = UIView()
+    private let sidebar = UIStackView()
+    private let content = UIView()
+    private let clockLabel = UILabel()
+    private let dateLabel = UILabel()
+    private let radioFrequency = UILabel()
+    private let songTitle = UILabel()
+    private let songSubtitle = UILabel()
+    private let playButton = UIButton(type: .system)
     private var timer: Timer?
-    private var selectedSection = "INICIO"
+    private var playing = false
 
-    override var prefersStatusBarHidden: Bool { return true }
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask { return .landscape }
+    override var prefersStatusBarHidden: Bool { true }
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .landscape }
+    override var shouldAutorotate: Bool { true }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,214 +32,379 @@ final class DashboardViewController: UIViewController {
         updateClock()
         timer = Timer.scheduledTimer(timeInterval: 30, target: self, selector: #selector(updateClock), userInfo: nil, repeats: true)
     }
-
     deinit { timer?.invalidate() }
 
-    private func buildUI() {
-        let header = UIView()
-        header.backgroundColor = UIColor(red: 8/255, green: 14/255, blue: 25/255, alpha: 1)
-        header.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(header)
-
-        titleLabel.text = "FERCHOSTER CAR"
-        titleLabel.font = UIFont.systemFont(ofSize: 21, weight: .bold)
-        titleLabel.textColor = .white
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        header.addSubview(titleLabel)
-
-        let owner = UILabel()
-        owner.text = "Fher Nando Batres"
-        owner.font = UIFont.systemFont(ofSize: 13, weight: .medium)
-        owner.textColor = silver
-        owner.translatesAutoresizingMaskIntoConstraints = false
-        header.addSubview(owner)
-
-        timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 18, weight: .semibold)
-        timeLabel.textColor = blue
-        timeLabel.textAlignment = .right
-        timeLabel.translatesAutoresizingMaskIntoConstraints = false
-        header.addSubview(timeLabel)
-
-        let sidebar = UIStackView()
-        sidebar.axis = .vertical
-        sidebar.spacing = 7
-        sidebar.distribution = .fillEqually
-        sidebar.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(sidebar)
-
-        let items = [("⌂", "INICIO"), ("♫", "MÚSICA"), ("◉", "RADIO"), ("❄", "CLIMA"), ("▶", "VIDEOS"), ("⌖", "MAPAS"), ("▦", "APPS"), ("⚙", "AJUSTES")]
-        for (symbol, name) in items {
-            let button = UIButton(type: .system)
-            button.backgroundColor = name == selectedSection ? blue : panel
-            button.layer.cornerRadius = 10
-            button.setTitle("\(symbol)  \(name)", for: .normal)
-            button.setTitleColor(.white, for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
-            button.contentHorizontalAlignment = .left
-            button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 3)
-            button.tag = items.firstIndex(where: {$0.1 == name}) ?? 0
-            button.addTarget(self, action: #selector(sectionTapped(_:)), for: .touchUpInside)
-            sidebar.addArrangedSubview(button)
+    private func makeLabel(_ text: String, _ size: CGFloat, _ weight: UIFont.Weight = .regular, _ color: UIColor = .white) -> UILabel {
+        let l = UILabel()
+        l.text = text
+        l.font = UIFont.systemFont(ofSize: size, weight: weight)
+        l.textColor = color
+        l.adjustsFontSizeToFitWidth = true
+        l.minimumScaleFactor = 0.65
+        return l
+    }
+    private func card(_ title: String? = nil) -> UIView {
+        let v = UIView()
+        v.backgroundColor = panel
+        v.layer.cornerRadius = 12
+        v.layer.borderWidth = 1
+        v.layer.borderColor = blue.withAlphaComponent(0.42).cgColor
+        if let title = title {
+            let l = makeLabel(title, 13, .semibold, silver)
+            l.translatesAutoresizingMaskIntoConstraints = false
+            v.addSubview(l)
+            NSLayoutConstraint.activate([
+                l.leadingAnchor.constraint(equalTo: v.leadingAnchor, constant: 10),
+                l.topAnchor.constraint(equalTo: v.topAnchor, constant: 7)
+            ])
         }
-
-        main.backgroundColor = panel
-        main.layer.cornerRadius = 18
-        main.layer.borderWidth = 1
-        main.layer.borderColor = UIColor.white.withAlphaComponent(0.08).cgColor
-        main.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(main)
-
-        sectionLabel.text = "BIENVENIDO, FHER"
-        sectionLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-        sectionLabel.textColor = .white
-        sectionLabel.translatesAutoresizingMaskIntoConstraints = false
-        main.addSubview(sectionLabel)
-
-        let subtitle = UILabel()
-        subtitle.text = "Tu experiencia multimedia, en un solo lugar"
-        subtitle.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        subtitle.textColor = silver
-        subtitle.translatesAutoresizingMaskIntoConstraints = false
-        main.addSubview(subtitle)
-
-        let carCard = makeCard(title: "VEHÍCULO", detail: "Hyundai Santa Fe Sport · 2017", symbol: "🚘")
-        main.addSubview(carCard)
-        let mediaCard = makeCard(title: "MULTIMEDIA", detail: "Selecciona Música para comenzar", symbol: "♫")
-        main.addSubview(mediaCard)
-
-        statusLabel.text = "INTERFAZ DEMOSTRATIVA · DATOS DEL VEHÍCULO NO CONECTADOS"
-        statusLabel.font = UIFont.systemFont(ofSize: 9, weight: .medium)
-        statusLabel.textColor = silver.withAlphaComponent(0.8)
-        statusLabel.numberOfLines = 1
-        statusLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(statusLabel)
-
-        NSLayoutConstraint.activate([
-            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            header.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            header.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            header.heightAnchor.constraint(equalToConstant: 58),
-
-            titleLabel.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 20),
-            titleLabel.centerYAnchor.constraint(equalTo: header.centerYAnchor),
-            owner.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 16),
-            owner.centerYAnchor.constraint(equalTo: header.centerYAnchor),
-            timeLabel.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -22),
-            timeLabel.centerYAnchor.constraint(equalTo: header.centerYAnchor),
-
-            sidebar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
-            sidebar.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 12),
-            sidebar.bottomAnchor.constraint(equalTo: statusLabel.topAnchor, constant: -8),
-            sidebar.widthAnchor.constraint(equalToConstant: 142),
-
-            main.leadingAnchor.constraint(equalTo: sidebar.trailingAnchor, constant: 12),
-            main.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -14),
-            main.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 12),
-            main.bottomAnchor.constraint(equalTo: statusLabel.topAnchor, constant: -8),
-
-            sectionLabel.leadingAnchor.constraint(equalTo: main.leadingAnchor, constant: 22),
-            sectionLabel.topAnchor.constraint(equalTo: main.topAnchor, constant: 22),
-            subtitle.leadingAnchor.constraint(equalTo: sectionLabel.leadingAnchor),
-            subtitle.topAnchor.constraint(equalTo: sectionLabel.bottomAnchor, constant: 6),
-
-            carCard.leadingAnchor.constraint(equalTo: main.leadingAnchor, constant: 22),
-            carCard.topAnchor.constraint(equalTo: subtitle.bottomAnchor, constant: 18),
-            carCard.widthAnchor.constraint(equalTo: main.widthAnchor, multiplier: 0.46),
-            carCard.bottomAnchor.constraint(equalTo: main.bottomAnchor, constant: -18),
-
-            mediaCard.leadingAnchor.constraint(equalTo: carCard.trailingAnchor, constant: 12),
-            mediaCard.trailingAnchor.constraint(equalTo: main.trailingAnchor, constant: -18),
-            mediaCard.topAnchor.constraint(equalTo: carCard.topAnchor),
-            mediaCard.bottomAnchor.constraint(equalTo: carCard.bottomAnchor),
-
-            statusLabel.leadingAnchor.constraint(equalTo: main.leadingAnchor, constant: 4),
-            statusLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
-            statusLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -4)
-        ])
+        return v
+    }
+    private func actionButton(_ title: String, tag: Int, target: Any, action: Selector) -> UIButton {
+        let b = UIButton(type: .system)
+        b.setTitle(title, for: .normal)
+        b.setTitleColor(.white, for: .normal)
+        b.titleLabel?.font = UIFont.systemFont(ofSize: 11, weight: .semibold)
+        b.backgroundColor = lightPanel
+        b.layer.cornerRadius = 8
+        b.layer.borderWidth = 1
+        b.layer.borderColor = blue.withAlphaComponent(0.35).cgColor
+        b.tag = tag
+        b.addTarget(target, action: action, for: .touchUpInside)
+        return b
     }
 
-    private func makeCard(title: String, detail: String, symbol: String) -> UIView {
-        let card = UIView()
-        card.backgroundColor = navy.withAlphaComponent(0.65)
-        card.layer.cornerRadius = 14
-        card.layer.borderWidth = 1
-        card.layer.borderColor = blue.withAlphaComponent(0.3).cgColor
-        let icon = UILabel()
-        icon.text = symbol
-        icon.font = UIFont.systemFont(ofSize: 30)
-        icon.textColor = blue
-        icon.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(icon)
-        let heading = UILabel()
-        heading.text = title
-        heading.font = UIFont.systemFont(ofSize: 12, weight: .bold)
-        heading.textColor = blue
-        heading.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(heading)
-        let text = UILabel()
-        text.text = detail
-        text.font = UIFont.systemFont(ofSize: 13, weight: .medium)
-        text.textColor = .white
-        text.numberOfLines = 2
-        text.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(text)
+    private func buildUI() {
+        root.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(root)
         NSLayoutConstraint.activate([
-            icon.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 15),
-            icon.topAnchor.constraint(equalTo: card.topAnchor, constant: 15),
-            heading.leadingAnchor.constraint(equalTo: icon.leadingAnchor),
-            heading.topAnchor.constraint(equalTo: icon.bottomAnchor, constant: 12),
-            text.leadingAnchor.constraint(equalTo: heading.leadingAnchor),
-            text.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
-            text.topAnchor.constraint(equalTo: heading.bottomAnchor, constant: 7),
-            text.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12)
+            root.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 9),
+            root.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -9),
+            root.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
+            root.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -6)
         ])
-        return card
+
+        header.backgroundColor = UIColor(red: 6/255, green: 13/255, blue: 24/255, alpha: 1)
+        header.layer.cornerRadius = 12
+        header.layer.borderWidth = 1
+        header.layer.borderColor = blue.withAlphaComponent(0.35).cgColor
+        header.translatesAutoresizingMaskIntoConstraints = false
+        root.addSubview(header)
+
+        let logo = makeLabel("HYUNDAI", 15, .heavy, silver)
+        let name = makeLabel("Fher Nando Batres", 21, .bold)
+        let signal = makeLabel("▮▮▮   Wi-Fi   ▰", 12, .semibold, blue)
+        for v in [logo, name, signal, clockLabel, dateLabel] {
+            v.translatesAutoresizingMaskIntoConstraints = false
+            header.addSubview(v)
+        }
+        clockLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 17, weight: .semibold)
+        clockLabel.textColor = .white
+        clockLabel.textAlignment = .right
+        dateLabel.font = UIFont.systemFont(ofSize: 9, weight: .medium)
+        dateLabel.textColor = silver
+        dateLabel.textAlignment = .right
+
+        NSLayoutConstraint.activate([
+            header.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            header.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+            header.topAnchor.constraint(equalTo: root.topAnchor),
+            header.heightAnchor.constraint(equalTo: root.heightAnchor, multiplier: 0.12),
+            logo.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 12),
+            logo.centerYAnchor.constraint(equalTo: header.centerYAnchor),
+            name.leadingAnchor.constraint(equalTo: logo.trailingAnchor, constant: 15),
+            name.centerYAnchor.constraint(equalTo: header.centerYAnchor),
+            name.trailingAnchor.constraint(lessThanOrEqualTo: signal.leadingAnchor, constant: -8),
+            signal.centerYAnchor.constraint(equalTo: header.centerYAnchor),
+            signal.trailingAnchor.constraint(equalTo: clockLabel.leadingAnchor, constant: -12),
+            clockLabel.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -12),
+            clockLabel.topAnchor.constraint(equalTo: header.topAnchor, constant: 6),
+            dateLabel.trailingAnchor.constraint(equalTo: clockLabel.trailingAnchor),
+            dateLabel.topAnchor.constraint(equalTo: clockLabel.bottomAnchor, constant: 0)
+        ])
+
+        sidebar.axis = .vertical
+        sidebar.spacing = 4
+        sidebar.distribution = .fillEqually
+        sidebar.translatesAutoresizingMaskIntoConstraints = false
+        root.addSubview(sidebar)
+        let items = ["⌂  Inicio", "♫  Música", "▤  Radio", "❄  Clima", "☎  Teléfono", "➤  Mapas", "▶  Videos", "▦  Apps", "▰  Vehículo", "⚙  Ajustes"]
+        for (i, item) in items.enumerated() {
+            let b = actionButton(item, tag: i, target: self, action: #selector(menuTapped(_:)))
+            b.contentHorizontalAlignment = .left
+            b.contentEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 1)
+            if i == 0 { b.backgroundColor = blue }
+            sidebar.addArrangedSubview(b)
+        }
+
+        content.translatesAutoresizingMaskIntoConstraints = false
+        root.addSubview(content)
+
+        let hero = card()
+        hero.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(hero)
+        let welcome = makeLabel("BIENVENIDO, FHER", 17, .bold)
+        let weather = makeLabel("☀  24°C   Palín, Escuintla", 12, .medium, silver)
+        let car = makeLabel("HYUNDAI\nSANTA FE SPORT", 24, .bold, silver)
+        car.numberOfLines = 2
+        car.textAlignment = .center
+        car.backgroundColor = UIColor(red: 10/255, green: 25/255, blue: 43/255, alpha: 1)
+        car.layer.cornerRadius = 10
+        car.clipsToBounds = true
+        for v in [welcome, weather, car] {
+            v.translatesAutoresizingMaskIntoConstraints = false
+            hero.addSubview(v)
+        }
+        NSLayoutConstraint.activate([
+            welcome.leadingAnchor.constraint(equalTo: hero.leadingAnchor, constant: 12),
+            welcome.topAnchor.constraint(equalTo: hero.topAnchor, constant: 10),
+            weather.leadingAnchor.constraint(equalTo: welcome.leadingAnchor),
+            weather.topAnchor.constraint(equalTo: welcome.bottomAnchor, constant: 4),
+            car.leadingAnchor.constraint(equalTo: hero.leadingAnchor, constant: 9),
+            car.trailingAnchor.constraint(equalTo: hero.trailingAnchor, constant: -9),
+            car.topAnchor.constraint(equalTo: weather.bottomAnchor, constant: 8),
+            car.bottomAnchor.constraint(equalTo: hero.bottomAnchor, constant: -9)
+        ])
+
+        let climate = card("❄  Climatización")
+        climate.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(climate)
+        let temp = makeLabel("−    22°C    +", 17, .bold)
+        temp.textAlignment = .center
+        temp.backgroundColor = lightPanel
+        temp.layer.cornerRadius = 8
+        temp.clipsToBounds = true
+        let fan = makeLabel("VENTILADOR   ▮ ▮ ▮ ▯", 10, .medium, silver)
+        let ac = actionButton("A/C   ⟳   SYNC", tag: 0, target: self, action: #selector(climateTapped))
+        for v in [temp, fan, ac] {
+            v.translatesAutoresizingMaskIntoConstraints = false
+            climate.addSubview(v)
+        }
+        NSLayoutConstraint.activate([
+            temp.leadingAnchor.constraint(equalTo: climate.leadingAnchor, constant: 8),
+            temp.bottomAnchor.constraint(equalTo: climate.bottomAnchor, constant: -8),
+            temp.widthAnchor.constraint(equalTo: climate.widthAnchor, multiplier: 0.38),
+            temp.heightAnchor.constraint(equalTo: climate.heightAnchor, multiplier: 0.42),
+            fan.leadingAnchor.constraint(equalTo: temp.trailingAnchor, constant: 5),
+            fan.centerYAnchor.constraint(equalTo: temp.centerYAnchor),
+            fan.trailingAnchor.constraint(equalTo: ac.leadingAnchor, constant: -4),
+            ac.trailingAnchor.constraint(equalTo: climate.trailingAnchor, constant: -7),
+            ac.centerYAnchor.constraint(equalTo: temp.centerYAnchor),
+            ac.widthAnchor.constraint(equalTo: climate.widthAnchor, multiplier: 0.24),
+            ac.heightAnchor.constraint(equalTo: temp.heightAnchor)
+        ])
+
+        let music = card("♫  Música")
+        music.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(music)
+        let album = makeLabel("FH\nCAR", 18, .heavy, blue)
+        album.numberOfLines = 2
+        album.textAlignment = .center
+        album.backgroundColor = UIColor(red: 3/255, green: 48/255, blue: 87/255, alpha: 1)
+        album.layer.cornerRadius = 9
+        album.clipsToBounds = true
+        songTitle.text = "Reproductor multimedia"
+        songTitle.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        songTitle.textColor = .white
+        songTitle.numberOfLines = 2
+        songSubtitle.text = "Conecta una fuente de audio"
+        songSubtitle.font = UIFont.systemFont(ofSize: 10, weight: .medium)
+        songSubtitle.textColor = silver
+        songSubtitle.numberOfLines = 2
+        let progress = UIProgressView(progressViewStyle: .default)
+        progress.progress = 0.28
+        progress.progressTintColor = blue
+        progress.trackTintColor = lightPanel
+        playButton.setTitle("▶", for: .normal)
+        playButton.setTitleColor(.white, for: .normal)
+        playButton.titleLabel?.font = UIFont.systemFont(ofSize: 19, weight: .bold)
+        playButton.backgroundColor = blue.withAlphaComponent(0.25)
+        playButton.layer.cornerRadius = 20
+        playButton.layer.borderWidth = 2
+        playButton.layer.borderColor = blue.cgColor
+        playButton.addTarget(self, action: #selector(playTapped), for: .touchUpInside)
+        for v in [album, songTitle, songSubtitle, progress, playButton] {
+            v.translatesAutoresizingMaskIntoConstraints = false
+            music.addSubview(v)
+        }
+        NSLayoutConstraint.activate([
+            album.leadingAnchor.constraint(equalTo: music.leadingAnchor, constant: 10),
+            album.topAnchor.constraint(equalTo: music.topAnchor, constant: 32),
+            album.widthAnchor.constraint(equalTo: music.widthAnchor, multiplier: 0.28),
+            album.heightAnchor.constraint(equalTo: album.widthAnchor),
+            songTitle.leadingAnchor.constraint(equalTo: album.trailingAnchor, constant: 9),
+            songTitle.trailingAnchor.constraint(equalTo: music.trailingAnchor, constant: -8),
+            songTitle.topAnchor.constraint(equalTo: album.topAnchor, constant: 1),
+            songSubtitle.leadingAnchor.constraint(equalTo: songTitle.leadingAnchor),
+            songSubtitle.trailingAnchor.constraint(equalTo: songTitle.trailingAnchor),
+            songSubtitle.topAnchor.constraint(equalTo: songTitle.bottomAnchor, constant: 3),
+            progress.leadingAnchor.constraint(equalTo: songTitle.leadingAnchor),
+            progress.trailingAnchor.constraint(equalTo: songTitle.trailingAnchor),
+            progress.topAnchor.constraint(equalTo: songSubtitle.bottomAnchor, constant: 4),
+            playButton.centerXAnchor.constraint(equalTo: music.centerXAnchor),
+            playButton.bottomAnchor.constraint(equalTo: music.bottomAnchor, constant: -5),
+            playButton.widthAnchor.constraint(equalToConstant: 38),
+            playButton.heightAnchor.constraint(equalToConstant: 38)
+        ])
+
+        let radio = card("▤  Radio FM")
+        radio.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(radio)
+        radioFrequency.text = "102.5 MHz"
+        radioFrequency.font = UIFont.systemFont(ofSize: 23, weight: .bold)
+        radioFrequency.textColor = .white
+        radioFrequency.textAlignment = .center
+        radioFrequency.translatesAutoresizingMaskIntoConstraints = false
+        radio.addSubview(radioFrequency)
+        let stations = UIStackView()
+        stations.axis = .horizontal
+        stations.spacing = 4
+        stations.distribution = .fillEqually
+        stations.translatesAutoresizingMaskIntoConstraints = false
+        radio.addSubview(stations)
+        for station in ["87.9", "91.3", "94.1", "102.5", "106.9"] {
+            stations.addArrangedSubview(actionButton(station, tag: 0, target: self, action: #selector(stationTapped(_:))))
+        }
+        NSLayoutConstraint.activate([
+            radioFrequency.centerXAnchor.constraint(equalTo: radio.centerXAnchor),
+            radioFrequency.topAnchor.constraint(equalTo: radio.topAnchor, constant: 25),
+            stations.leadingAnchor.constraint(equalTo: radio.leadingAnchor, constant: 7),
+            stations.trailingAnchor.constraint(equalTo: radio.trailingAnchor, constant: -7),
+            stations.bottomAnchor.constraint(equalTo: radio.bottomAnchor, constant: -6),
+            stations.heightAnchor.constraint(equalToConstant: 25)
+        ])
+
+        let apps = card("Aplicaciones")
+        apps.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(apps)
+        let appStack = UIStackView()
+        appStack.axis = .horizontal
+        appStack.spacing = 5
+        appStack.distribution = .fillEqually
+        appStack.translatesAutoresizingMaskIntoConstraints = false
+        apps.addSubview(appStack)
+        for app in ["▶\nVideos", "♫\nMúsica", "➤\nMapas", "▦\nApps"] {
+            let b = actionButton(app, tag: 0, target: self, action: #selector(appTapped(_:)))
+            b.titleLabel?.numberOfLines = 2
+            appStack.addArrangedSubview(b)
+        }
+        NSLayoutConstraint.activate([
+            appStack.leadingAnchor.constraint(equalTo: apps.leadingAnchor, constant: 7),
+            appStack.trailingAnchor.constraint(equalTo: apps.trailingAnchor, constant: -7),
+            appStack.topAnchor.constraint(equalTo: apps.topAnchor, constant: 28),
+            appStack.bottomAnchor.constraint(equalTo: apps.bottomAnchor, constant: -6)
+        ])
+
+        let bottom = UIStackView()
+        bottom.axis = .horizontal
+        bottom.spacing = 4
+        bottom.distribution = .fillEqually
+        bottom.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(bottom)
+        for title in ["CarPlay", "Teléfono", "Cámara", "Vehículo", "Pantalla"] {
+            bottom.addArrangedSubview(actionButton(title, tag: 0, target: self, action: #selector(appTapped(_:))))
+        }
+
+        NSLayoutConstraint.activate([
+            sidebar.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            sidebar.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 7),
+            sidebar.bottomAnchor.constraint(equalTo: root.bottomAnchor, constant: -15),
+            sidebar.widthAnchor.constraint(equalTo: root.widthAnchor, multiplier: 0.14),
+
+            content.leadingAnchor.constraint(equalTo: sidebar.trailingAnchor, constant: 7),
+            content.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+            content.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 7),
+            content.bottomAnchor.constraint(equalTo: root.bottomAnchor, constant: -15),
+
+            hero.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            hero.topAnchor.constraint(equalTo: content.topAnchor),
+            hero.widthAnchor.constraint(equalTo: content.widthAnchor, multiplier: 0.53),
+            hero.heightAnchor.constraint(equalTo: content.heightAnchor, multiplier: 0.64),
+
+            climate.leadingAnchor.constraint(equalTo: hero.leadingAnchor),
+            climate.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
+            climate.topAnchor.constraint(equalTo: hero.bottomAnchor, constant: 6),
+            climate.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -24),
+
+            music.leadingAnchor.constraint(equalTo: hero.trailingAnchor, constant: 6),
+            music.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+            music.topAnchor.constraint(equalTo: content.topAnchor),
+            music.heightAnchor.constraint(equalTo: content.heightAnchor, multiplier: 0.36),
+
+            radio.leadingAnchor.constraint(equalTo: music.leadingAnchor),
+            radio.trailingAnchor.constraint(equalTo: music.trailingAnchor),
+            radio.topAnchor.constraint(equalTo: music.bottomAnchor, constant: 6),
+            radio.heightAnchor.constraint(equalTo: content.heightAnchor, multiplier: 0.22),
+
+            apps.leadingAnchor.constraint(equalTo: radio.leadingAnchor),
+            apps.trailingAnchor.constraint(equalTo: radio.trailingAnchor),
+            apps.topAnchor.constraint(equalTo: radio.bottomAnchor, constant: 6),
+            apps.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -24),
+
+            bottom.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            bottom.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+            bottom.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            bottom.heightAnchor.constraint(equalToConstant: 19)
+        ])
     }
 
     @objc private func updateClock() {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "es_GT")
-        formatter.dateFormat = "HH:mm"
-        timeLabel.text = formatter.string(from: Date())
+        let t = DateFormatter()
+        t.locale = Locale(identifier: "es_GT")
+        t.dateFormat = "h:mm a"
+        clockLabel.text = t.string(from: Date())
+        let d = DateFormatter()
+        d.locale = Locale(identifier: "es_GT")
+        d.dateFormat = "EEEE d MMM yyyy"
+        dateLabel.text = d.string(from: Date()).capitalized
     }
-
-    @objc private func sectionTapped(_ sender: UIButton) {
-        let items = ["INICIO", "MÚSICA", "RADIO", "CLIMA", "VIDEOS", "MAPAS", "APPS", "AJUSTES"]
-        selectedSection = items[sender.tag]
-        for case let button as UIButton in (sender.superview?.arrangedSubviews ?? []) {
-            button.backgroundColor = button.tag == sender.tag ? blue : panel
+    @objc private func menuTapped(_ sender: UIButton) {
+        let sections = ["INICIO", "MÚSICA", "RADIO", "CLIMA", "TELÉFONO", "MAPAS", "VIDEOS", "APPS", "VEHÍCULO", "AJUSTES"]
+        for case let b as UIButton in sidebar.arrangedSubviews {
+            b.backgroundColor = b.tag == sender.tag ? blue : panel
         }
-        switch selectedSection {
-        case "MÚSICA":
-            sectionLabel.text = "MÚSICA"
-            // iOS media controls can be added in a later phase.
-            presentMessage("Reproductor", "La pantalla de música está preparada para la siguiente fase de desarrollo.")
+        let section = sections[min(sender.tag, sections.count - 1)]
+        switch section {
         case "RADIO":
-            sectionLabel.text = "RADIO"
-            presentMessage("Radio original", "El control de emisoras FM/AM requiere una interfaz compatible con el equipo Hyundai.")
+            message("Radio FM", "La frecuencia mostrada es visual. Cambiar la emisora real requiere una integración compatible con el radio Hyundai.")
         case "CLIMA":
-            sectionLabel.text = "CLIMA"
-            presentMessage("Climatización", "Los controles reales requieren una integración electrónica compatible.")
+            message("Climatización", "Los controles son demostrativos; no modifican el aire acondicionado real sin una interfaz electrónica compatible.")
+        case "VEHÍCULO":
+            message("Vehículo", "Los datos de combustible, batería y kilometraje no están conectados al vehículo.")
         case "VIDEOS":
-            sectionLabel.text = "VIDEOS"
-            presentMessage("Videos", "El reproductor local se implementará en la siguiente fase.")
+            message("Videos", "La reproducción depende de una fuente compatible y de las restricciones de iOS/CarPlay. No reproduzcas videos mientras conduces.")
+        case "TELÉFONO":
+            message("Teléfono", "Utiliza las funciones de llamadas disponibles mediante CarPlay.")
         case "MAPAS":
-            sectionLabel.text = "MAPAS"
-            presentMessage("Mapas", "Puedes seguir utilizando la navegación disponible en CarPlay.")
+            message("Mapas", "Puedes usar la navegación disponible en CarPlay.")
         case "APPS":
-            sectionLabel.text = "APLICACIONES"
-            presentMessage("Aplicaciones", "Los accesos dependerán de la compatibilidad con iOS y CarBridge.")
+            message("Aplicaciones", "Los accesos dependen de las aplicaciones instaladas y de su compatibilidad.")
         case "AJUSTES":
-            sectionLabel.text = "AJUSTES"
-            presentMessage("Ajustes", "FERCHOSTER CAR · Versión 1.0")
-        default:
-            sectionLabel.text = "BIENVENIDO, FHER"
+            message("FERCHOSTER CAR", "Interfaz personalizada para Fher Nando Batres.")
+        case "MÚSICA":
+            songTitle.text = "Audio del iPhone"
+            songSubtitle.text = "Controles reales aún por integrar"
+        default: break
         }
     }
-
-    private func presentMessage(_ title: String, _ message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Entendido", style: .default))
-        present(alert, animated: true)
+    @objc private func playTapped() {
+        playing.toggle()
+        playButton.setTitle(playing ? "Ⅱ" : "▶", for: .normal)
+        songSubtitle.text = playing ? "Estado visual: reproduciendo" : "Reproducción pausada"
+    }
+    @objc private func stationTapped(_ sender: UIButton) {
+        radioFrequency.text = "\(sender.title(for: .normal) ?? "102.5") MHz"
+    }
+    @objc private func climateTapped() {
+        message("Climatización", "Estos controles son visuales y no controlan el aire real del vehículo.")
+    }
+    @objc private func appTapped(_ sender: UIButton) {
+        message(sender.title(for: .normal) ?? "Acceso", "Este acceso es visual. La función real requiere integrar una aplicación o servicio compatible.")
+    }
+    private func message(_ title: String, _ text: String) {
+        let a = UIAlertController(title: title, message: text, preferredStyle: .alert)
+        a.addAction(UIAlertAction(title: "Entendido", style: .default))
+        present(a, animated: true)
     }
 }
+
