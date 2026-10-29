@@ -1,0 +1,29 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 50;
+	objects = {
+		A10000000000000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A10000000000000000000002 /* DashboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewController.swift; sourceTree = "<group>"; };
+		A10000000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000000000000000000004 /* FERCHOSTER_CAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FERCHOSTER_CAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000005 = {isa = PBXBuildFile; fileRef = A10000000000000000000001; };
+		A10000000000000000000006 = {isa = PBXBuildFile; fileRef = A10000000000000000000002; };
+		A10000000000000000000007 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000005, A10000000000000000000006, ); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000009 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000010 = {isa = PBXGroup; children = (A10000000000000000000011, A10000000000000000000012, ); sourceTree = "<group>"; };
+		A10000000000000000000011 = {isa = PBXGroup; path = FERCHOSTER_CAR; sourceTree = "<group>"; children = (A10000000000000000000001, A10000000000000000000002, A10000000000000000000003, ); };
+		A10000000000000000000012 = {isa = PBXGroup; name = Products; sourceTree = "<group>"; children = (A10000000000000000000004, ); };
+		A10000000000000000000013 /* FERCHOSTER_CAR target */ = {isa = PBXNativeTarget; buildConfigurationList = A10000000000000000000014; buildPhases = (A10000000000000000000007, A10000000000000000000008, A10000000000000000000009, ); buildRules = (); dependencies = (); name = FERCHOSTER_CAR; productName = FERCHOSTER_CAR; productReference = A10000000000000000000004; productType = "com.apple.product-type.application"; };
+		A10000000000000000000015 = {isa = PBXProject; attributes = {LastUpgradeCheck = 1500; TargetAttributes = {A10000000000000000000013 = {CreatedOnToolsVersion = 15.0; }; }; }; buildConfigurationList = A10000000000000000000016; compatibilityVersion = "Xcode 14.0"; developmentRegion = es; hasScannedForEncodings = 0; knownRegions = (en, es, Base, ); mainGroup = A10000000000000000000010; productRefGroup = A10000000000000000000012; projectDirPath = ""; projectRoot = ""; targets = (A10000000000000000000013, ); };
+		A10000000000000000000017 = {isa = XCBuildConfiguration; buildSettings = {IPHONEOS_DEPLOYMENT_TARGET = 12.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Debug; };
+		A10000000000000000000018 = {isa = XCBuildConfiguration; buildSettings = {IPHONEOS_DEPLOYMENT_TARGET = 12.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Release; };
+		A10000000000000000000019 = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = ""; CODE_SIGNING_ALLOWED = NO; INFOPLIST_FILE = FERCHOSTER_CAR/Info.plist; PRODUCT_BUNDLE_IDENTIFIER = com.ferchoster.FherCar; PRODUCT_NAME = FERCHOSTER_CAR; TARGETED_DEVICE_FAMILY = "1"; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 12.0; }; name = Debug; };
+		A10000000000000000000020 = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = ""; CODE_SIGNING_ALLOWED = NO; INFOPLIST_FILE = FERCHOSTER_CAR/Info.plist; PRODUCT_BUNDLE_IDENTIFIER = com.ferchoster.FherCar; PRODUCT_NAME = FERCHOSTER_CAR; TARGETED_DEVICE_FAMILY = "1"; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 12.0; }; name = Release; };
+		A10000000000000000000014 = {isa = XCConfigurationList; buildConfigurations = (A10000000000000000000019, A10000000000000000000020, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A10000000000000000000016 = {isa = XCConfigurationList; buildConfigurations = (A10000000000000000000017, A10000000000000000000018, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+	};
+	rootObject = A10000000000000000000015;
+}

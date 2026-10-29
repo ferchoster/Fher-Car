@@ -1,0 +1,31 @@
+workflows:
+  fher-car-ios:
+    name: FERCHOSTER CAR iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      vars:
+        XCODE_PROJECT: "FERCHOSTER_CAR.xcodeproj"
+        XCODE_SCHEME: "FERCHOSTER_CAR"
+    scripts:
+      - name: Build app for iOS device (unsigned)
+        script: |
+          xcodebuild -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Debug \
+            -sdk iphoneos \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+      - name: Package unsigned IPA
+        script: |
+          APP_PATH="build/DerivedData/Build/Products/Debug-iphoneos/FERCHOSTER_CAR.app"
+          test -d "$APP_PATH"
+          mkdir -p build/ipa/Payload
+          cp -R "$APP_PATH" build/ipa/Payload/
+          cd build/ipa
+          zip -r ../../FERCHOSTER_CAR_unsigned.ipa Payload
+    artifacts:
+      - build/ipa/*.ipa
+      - build/DerivedData/Build/Products/Debug-iphoneos/*.app
